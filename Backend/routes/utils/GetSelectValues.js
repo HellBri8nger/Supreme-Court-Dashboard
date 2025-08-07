@@ -2,9 +2,7 @@ async function GetSelectValues(page, id){
   await page.goto("https://www.sci.gov.in/judgements-case-no/")
   try{
     await page.waitForSelector(id)
-  }catch (err){
-    console.log(err)
-  }
+  }catch (err) { return null }
 
   const select_values = await page.evaluate((id) => {
     const options = Array.from(document.querySelectorAll(`${id} option`))

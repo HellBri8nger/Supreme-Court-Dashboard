@@ -6,7 +6,7 @@ async function SolveCaptcha(page) {
   try{
     await page.waitForSelector("#siwp_captcha_image_0")
   }catch (err){
-    console.log(err) //TODO Do error handling
+    return null
   }
 
   const targetElement = await page.$('#siwp_captcha_image_0')
@@ -16,8 +16,6 @@ async function SolveCaptcha(page) {
     const captcha = document.querySelector("img#siwp_captcha_image_0")
     return captcha.src
   })
-
-  console.log(captchaImage)
 
   const image = await fetch(captchaImage);
   const imageArrayBuffer = await image.arrayBuffer();

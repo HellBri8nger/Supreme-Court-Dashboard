@@ -20,13 +20,19 @@ const router = Router()
 router.get("/get-case-types", async (req, res) => {
   const page = await browser.newPage()
   await page.setUserAgent(userAgent)
-  res.send(await GetSelectValues(page, "#case_type"))
+
+  const caseTypes = await GetSelectValues(page, "#case_type", res)
+  if(caseTypes) res.send(caseTypes)
+  else res.status(502).json({error: "Bad gateway", message: "Target site failed to load"})
 })
 
 router.get("/get-year", async (req, res) => {
   const page = await browser.newPage()
   await page.setUserAgent(userAgent)
-  res.send(await GetSelectValues(page, "#year"))
+
+  const caseYears = await GetSelectValues(page, "#year", res)
+  if(caseYears) res.send(caseYears)
+  else res.status(502).json({error: "Bad gateway", message: "Target site failed to load"})
 })
 
 router.get("/get-case", async (req, res) => {
@@ -48,21 +54,22 @@ router.get("/get-case", async (req, res) => {
   await HandleInputs(page, "#select2-year-container", caseYear, 100)
   await HandleInputs(page, "#case_no", caseNumber, 0, false)
 
-
   await delayTime(2000)
-  console.log("Delay Finished")
   const captchaAnswer = await SolveCaptcha(page)
-  console.log(captchaAnswer)
-  await HandleInputs(page, ".enter-captcha", captchaAnswer, 0, false)
-  await page.click("#sciapi-services-judgements-case-no > div.form-row.mr-none > div.second_col > input:nth-child(1)")
+  if(captchaAnswer){
+    await HandleInputs(page, ".enter-captcha", captchaAnswer, 0, false)
+    await page.click("#sciapi-services-judgements-case-no > div.form-row.mr-none > div.second_col > input:nth-child(1)")
+  }else res.status(500).json({error: "Internal Server Error", message: "Captcha failed"})
 
   try{
     await page.waitForSelector(".notfound", {timeout: 2300})
     const result = await page.$('.notfound')
     const innerText = await page.evaluate(element => element.innerText, result)
-    console.log(innerText)
 
-    res.sendStatus(204)
+    await page.close()
+
+    if(innerText === "The captcha code entered was incorrect.") res.status(500).json({error: "Internal Server Error", message: "Captcha failed"})
+    else res.status(404).json({error: "Not Found", message: innerText})
 
   }catch(err){
     const result = await page.evaluate(() => {
@@ -82,6 +89,8 @@ router.get("/get-case", async (req, res) => {
       })
       return { headers, rows }
     })
+
+    await page.close()
 
     const row = result.rows[0]
     const parsedData = {}
