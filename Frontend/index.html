@@ -1,33 +1,12 @@
-<!DOCTYPE html>
-
-<html>
+<!doctype html>
+<html lang="en">
   <head>
-    <title> Delhi Court Dashboard </title>
-    <script src="index.js"></script>
-    <link rel="stylesheet" href="index.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
   </head>
-
   <body>
-  <h1 id="site-title" >Delhi Court Dashboard</h1>
-
-
-  <div class="case-details">
-    <div class="case-fetch">
-      <label for="case-type">Case Type:</label>
-      <select id="case-type"> <option value="0" selected="selected">Select Case Type</option> </select>
-
-      <label for="case-year">Year: </label>
-      <select id="case-year"> <option value="0" selected="selected">Select Year</option> </select>
-
-      <label for="case-number">Case Number:</label>
-      <input id="case-number" type="text">
-
-      <button id="fetch-case">Submit</button>
-    </div>
-
-    <div class="case-results">
-
-    </div>
-  </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
