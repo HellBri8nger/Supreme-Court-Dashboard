@@ -12,7 +12,7 @@ export default function CaseDetailsTable({ data }) {
     "Petitioner/Respondent Advocate": advocate,
     "Bench": bench,
     "Judgment By": judgmentBy,
-    "Judgment": judgments,
+    "Judgment": judgments
   } = data
 
   const rows = [
@@ -21,7 +21,7 @@ export default function CaseDetailsTable({ data }) {
     ["Petitioner / Respondent", parties],
     ["Petitioner/Respondent Advocate", advocate],
     ["Bench", bench],
-    ["Judgment By", judgmentBy],
+    ["Judgment By", judgmentBy]
   ]
 
   return (

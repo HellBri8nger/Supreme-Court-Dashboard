@@ -1,8 +1,15 @@
 const { Router } = require('express')
 const puppeteer = require("puppeteer")
+const sqlite3 = require("sqlite3").verbose()
 const GetSelectValues = require("./utils/GetSelectValues")
 const SolveCaptcha = require("./utils/SolveCaptcha")
+const fs = require('fs')
 require("dotenv").config()
+
+if (!fs.existsSync("casehistory.db")) fs.writeFileSync("casehistory.db", '', {flag: 'w'})
+const db = new sqlite3.Database("casehistory.db", sqlite3.OPEN_READWRITE)
+db.run("CREATE TABLE IF NOT EXISTS caseHistory(id integer PRIMARY KEY AUTOINCREMENT,caseType, caseYear, caseNumber, caseData, UNIQUE(caseType, caseYear, caseNumber))")
+
 
 let browser
 const userAgent = "Mozilla/5.0 (Linux Android 10 K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3"
@@ -108,7 +115,12 @@ router.post("/get-case", async (req, res) => {
     result.headers.forEach((header, i) => parsedData[header] = row[i])
 
     res.send(parsedData)
+    db.run(`INSERT OR IGNORE INTO caseHistory (caseType, caseYear, caseNumber, caseData) VALUES (?, ?, ?, ?)`, [caseType, caseYear, caseNumber, JSON.stringify(parsedData)])
   }
+})
+
+router.get("/get-history", async (req, res) => {
+   db.all(`SELECT * FROM caseHistory`, [], (err, rows) => res.send(rows))
 })
 
 module.exports = router
