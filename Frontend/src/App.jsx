@@ -1,8 +1,9 @@
 import './App.css'
 import { useEffect, useState } from 'react'
-import {Button, Select, TextInput, Box, Notification, LoadingOverlay} from '@mantine/core'
+import {Button, Select, TextInput, Box, Notification, LoadingOverlay, Card} from '@mantine/core'
 import { useForm } from '@mantine/form'
 import CaseDetails from './Components/CaseDetails.jsx'
+import PreviousCases from "./Components/PreviousCases.jsx";
 
 function App() {
   const [caseTypeData, setCaseTypeData] = useState([])
@@ -10,6 +11,7 @@ function App() {
   const [caseValue, setCaseValue] = useState(null)
   const [loading, setLoading] = useState(false)
   const [fetchError, setFetchError] = useState(null)
+  const [caseHistoryData, setCaseHistoryData] = useState([])
 
   const form = useForm({
     initialValues: {caseType: '', caseYear: '', caseNumber: '',},
@@ -23,15 +25,18 @@ function App() {
   useEffect(() => {
     async function fetchDropdownData() {
       try {
-        const [typesResponse, yearsResponse] = await Promise.all([
+        const [typesResponse, yearsResponse, historyResponse] = await Promise.all([
           fetch('http://localhost:3000/fetch/get-case-types'),
-          fetch('http://localhost:3000/fetch/get-year')
+          fetch('http://localhost:3000/fetch/get-year'),
+          fetch('http://localhost:3000/fetch/get-history'),
         ])
 
-        const [types, years] = await Promise.all([typesResponse.json(), yearsResponse.json()])
+        const [types, years, history] = await Promise.all([typesResponse.json(), yearsResponse.json(), historyResponse.json()])
+        console.log(history)
 
         setCaseTypeData(Object.values(types))
         setCaseYearData(Object.values(years))
+        setCaseHistoryData(history)
       } catch (err) {
         console.error('Error fetching dropdown data:', err)
         setFetchError('Failed to load dropdown data.')
@@ -63,18 +68,16 @@ function App() {
     } catch (err) {
       console.error('Error submitting case data:', err)
       setFetchError(err.message || 'Failed to fetch case details.')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
 
   return (
-    <>
+    <div>
       <h2 className="title">Supreme Court Case Lookup</h2>
 
       {fetchError && (<Notification className="error" color="red" title="Error" mb="sm"> {fetchError} </Notification>)}
 
-      <Box className="form-wrapper" pos="relative">
+      <Card className="form-wrapper" pos="relative" withBorder>
         <LoadingOverlay visible={caseTypeData.length === 0 || caseYearData.length === 0} zIndex={1000} overlayBlur={2}/>
 
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -114,11 +117,11 @@ function App() {
             Submit
           </Button>
         </form>
-      </Box>
+      </Card>
 
       <Box className="results-wrapper"> <CaseDetails data={caseValue} /> </Box>
-
-    </>
+      <PreviousCases cases={caseHistoryData}/>
+    </div>
   )
 }
 
