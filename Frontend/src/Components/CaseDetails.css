@@ -1,0 +1,25 @@
+.case-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+}
+
+.case-table td {
+    padding: 12px 16px;
+    vertical-align: top;
+}
+
+.case-table tr:not(:last-child) {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.label-cell {
+    width: 30%;
+    font-weight: 600;
+    background-color: #f8f9fa;
+    white-space: nowrap;
+}
+
+.value-cell {
+    white-space: pre-line;
+}
