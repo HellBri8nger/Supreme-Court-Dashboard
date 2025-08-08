@@ -21,7 +21,7 @@ router.get("/get-case-types", async (req, res) => {
   const page = await browser.newPage()
   await page.setUserAgent(userAgent)
 
-  const caseTypes = await GetSelectValues(page, "#case_type", res)
+  const caseTypes = await GetSelectValues(page, "#case_type")
   if(caseTypes) res.send(caseTypes)
   else res.status(502).json({error: "Bad gateway", message: "Target site failed to load"})
 })
@@ -30,12 +30,14 @@ router.get("/get-year", async (req, res) => {
   const page = await browser.newPage()
   await page.setUserAgent(userAgent)
 
-  const caseYears = await GetSelectValues(page, "#year", res)
+  const caseYears = await GetSelectValues(page, "#year")
   if(caseYears) res.send(caseYears)
   else res.status(502).json({error: "Bad gateway", message: "Target site failed to load"})
 })
 
-router.get("/get-case", async (req, res) => {
+router.post("/get-case", async (req, res) => {
+  const {caseType, caseYear, caseNumber} = req.body
+
   async function HandleInputs(page, selector, value, delay = 0, press_enter = true){
     await page.click(selector)
     if(delay > 0) await delayTime(delay)
@@ -48,7 +50,16 @@ router.get("/get-case", async (req, res) => {
   await page.setUserAgent(userAgent)
   await page.goto("https://www.sci.gov.in/judgements-case-no/")
 
-  const {caseType, caseYear, caseNumber} = req.body
+  const caseTypes = await GetSelectValues(page, "#case_type", false)
+  const caseYears = await GetSelectValues(page, "#year", false)
+
+  if(!caseTypes || !caseYears) return res.status(502).json({error: "Bad gateway", message: "Target site failed to load"})
+  else {
+    if(!Object.values(caseTypes).includes(caseType) || !Object.values(caseYears).includes(caseYear)){
+      await page.close()
+      return res.status(400).json({error: "Bad request", message: "One of more fields are invalid"})
+    }
+  }
 
   await HandleInputs(page, "#select2-case_type-container", caseType, 100)
   await HandleInputs(page, "#select2-year-container", caseYear, 100)
@@ -59,7 +70,7 @@ router.get("/get-case", async (req, res) => {
   if(captchaAnswer){
     await HandleInputs(page, ".enter-captcha", captchaAnswer, 0, false)
     await page.click("#sciapi-services-judgements-case-no > div.form-row.mr-none > div.second_col > input:nth-child(1)")
-  }else res.status(500).json({error: "Internal Server Error", message: "Captcha failed"})
+  }else return res.status(500).json({error: "Internal Server Error", message: "Captcha failed"})
 
   try{
     await page.waitForSelector(".notfound", {timeout: 2300})
@@ -68,8 +79,8 @@ router.get("/get-case", async (req, res) => {
 
     await page.close()
 
-    if(innerText === "The captcha code entered was incorrect.") res.status(500).json({error: "Internal Server Error", message: "Captcha failed"})
-    else res.status(404).json({error: "Not Found", message: innerText})
+    if(innerText === "The captcha code entered was incorrect.") return res.status(500).json({error: "Internal Server Error", message: "Captcha failed"})
+    else return res.status(404).json({error: "Not Found", message: innerText})
 
   }catch(err){
     const result = await page.evaluate(() => {

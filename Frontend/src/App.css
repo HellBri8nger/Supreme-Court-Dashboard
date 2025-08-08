@@ -1,0 +1,30 @@
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.form-wrapper {
+    max-width: 400px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.spacing-top {
+    margin-top: 16px;
+}
+
+.submit-button {
+    margin-top: 24px;
+}
+
+.results-wrapper {
+    margin-top: 40px;
+    padding: 0 16px;
+}
+
+.error {
+    max-width: 400px;
+    margin: 0 auto 16px;
+}
