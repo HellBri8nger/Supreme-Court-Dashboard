@@ -6,6 +6,8 @@ import CaseDetails from './Components/CaseDetails.jsx'
 import PreviousCases from "./Components/PreviousCases.jsx";
 
 function App() {
+  const clientURL = "http://localhost:3000"
+
   const [caseTypeData, setCaseTypeData] = useState([])
   const [caseYearData, setCaseYearData] = useState([])
   const [caseValue, setCaseValue] = useState(null)
@@ -26,9 +28,9 @@ function App() {
     async function fetchDropdownData() {
       try {
         const [typesResponse, yearsResponse, historyResponse] = await Promise.all([
-          fetch('http://localhost:3000/fetch/get-case-types'),
-          fetch('http://localhost:3000/fetch/get-year'),
-          fetch('http://localhost:3000/fetch/get-history'),
+          fetch(`${clientURL}/fetch/get-case-types`),
+          fetch(`${clientURL}/fetch/get-year`),
+          fetch(`${clientURL}/fetch/get-history`),
         ])
 
         const [types, years, history] = await Promise.all([typesResponse.json(), yearsResponse.json(), historyResponse.json()])
@@ -52,7 +54,7 @@ function App() {
     setCaseValue(null)
 
     try {
-      const res = await fetch('http://localhost:3000/fetch/get-case', {
+      const res = await fetch(`${clientURL}/fetch/get-case`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),

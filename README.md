@@ -13,3 +13,6 @@
 
 The code simply fetches the captcha and forwards it to Gemini with a prompt to get the answer
 
+***
+
+used some chatgpt for the frontend
